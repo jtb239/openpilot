@@ -197,7 +197,15 @@ class LongitudinalMpc(object):
         v_lead = 0.0
         a_lead = 0.0
 
+      user_lead_tau = 6.0  # Arbitrary high value in case its not there
       self.a_lead_tau = max(lead.aLeadTau, (a_lead**2 * math.pi) / (2 * (v_lead + 0.01)**2))
+      if CS.follow_level is not None:
+        if CS.follow_level == 2:
+          user_lead_tau = 3.
+        elif CS.follow_level == 1:
+          user_lead_tau = 1.7
+      self.a_lead_tau = min(self.a_lead_tau, user_lead_tau)
+
       self.new_lead = False
       if not self.prev_lead_status or abs(x_lead - self.prev_lead_x) > 2.5:
         self.libmpc.init_with_simulation(self.v_mpc, x_lead, v_lead, a_lead, self.a_lead_tau)
