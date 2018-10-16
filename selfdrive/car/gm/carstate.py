@@ -29,7 +29,7 @@ def get_powertrain_can_parser(CP, canbus):
     ("PRNDL", "ECMPRDNL", 0),
     ("LKADriverAppldTrq", "PSCMStatus", 0),
     ("LKATorqueDeliveredStatus", "PSCMStatus", 0),
-    ("ASCMSteeringButton", "DistanceButton", 0)
+    ("DistanceButton", "ASCMSteeringButton", 0),
   ]
 
   if CP.carFingerprint == CAR.VOLT:
@@ -146,4 +146,7 @@ class CarState(object):
     self.brake_pressed = self.user_brake > 10 or self.regen_pressed
 
     self.gear_shifter_valid = self.gear_shifter == car.CarState.GearShifter.drive
+
+  def get_follow_level(self):
+    return self.follow_level
 
