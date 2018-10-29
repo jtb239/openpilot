@@ -208,6 +208,10 @@ class CarInterface(object):
     ret.gearShifter = self.CS.gear_shifter
 
     ret.readdistancelines = self.CS.follow_level
+    ret.genericToggle = False
+    ret.laneDepartureToggle = False
+    ret.distanceToggle = self.CS.follow_level
+    ret.accSlowToggle = False
 
     buttonEvents = []
 
