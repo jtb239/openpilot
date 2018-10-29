@@ -199,11 +199,11 @@ class LongitudinalMpc(object):
 
       user_lead_tau = 6.0  # Arbitrary high value in case its not there
       self.a_lead_tau = max(lead.aLeadTau, (a_lead**2 * math.pi) / (2 * (v_lead + 0.01)**2))
-      get_follow_level = hasattr(CS, "get_follow_level", None)
+      get_follow_level = getattr(CS, "get_follow_level", None)
       if callable(get_follow_level):
-        if CS.get_follow_level() == 2:
+        if get_follow_level() == 2:
           user_lead_tau = 3.
-        elif CS.get_follow_level() == 1:
+        elif get_follow_level() == 1:
           user_lead_tau = 1.7
       self.a_lead_tau = min(self.a_lead_tau, user_lead_tau)
 
