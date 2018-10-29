@@ -80,7 +80,12 @@ class CarController(object):
   def update(self, sendcan, enabled, CS, frame, actuators, \
              hud_v_cruise, hud_show_lanes, hud_show_car, chime, chime_cnt):
     """ Controls thread """
-
+#update custom UI buttons and alerts
+    CS.UE.update_custom_ui()
+    if (frame % 1000 == 0):
+      CS.cstm_btns.send_button_info()
+      CS.UE.uiSetCarEvent(CS.cstm_btns.car_folder,CS.cstm_btns.car_name)
+      
     # Sanity check.
     if not self.allow_controls:
       return
@@ -102,7 +107,8 @@ class CarController(object):
 
       self.apply_steer_last = apply_steer
       idx = (frame / P.STEER_STEP) % 4
-
+      if CS.cstm_btns.get_button_status("lka") == 0:
+        apply_steer = 0
       if self.car_fingerprint == CAR.VOLT:
         can_sends.append(gmcan.create_steering_control(self.packer_pt,
           canbus.powertrain, apply_steer, idx, lkas_enabled))

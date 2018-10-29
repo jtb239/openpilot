@@ -207,6 +207,8 @@ class CarInterface(object):
     ret.seatbeltUnlatched = not self.CS.seatbelt
     ret.gearShifter = self.CS.gear_shifter
 
+    ret.readdistancelines = self.CS.follow_level
+
     buttonEvents = []
 
     # blinkers
@@ -249,6 +251,7 @@ class CarInterface(object):
       if self.CS.follow_level < 1:
         self.CS.follow_level = 3
 
+    ret.gasbuttonstatus = self.CS.cstm_btns.get_button_status("gas")
     events = []
     if not self.CS.can_valid:
       self.can_invalid_count += 1

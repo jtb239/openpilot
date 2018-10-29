@@ -23,6 +23,7 @@ _DT = 0.01    # 100Hz
 _DT_MPC = 0.2  # 5Hz
 MAX_SPEED_ERROR = 2.0
 AWARENESS_DECEL = -0.2     # car smoothly decel at .2m/s^2 when user is distracted
+TR=1.8 # CS.readdistancelines
 
 GPS_PLANNER_ADDR = "192.168.5.1"
 
@@ -149,7 +150,7 @@ class LongitudinalMpc(object):
     self.prev_lead_status = False
     self.prev_lead_x = 0.0
     self.new_lead = False
-
+    self.lastTR = 2
     self.last_cloudlog_t = 0.0
 
   def send_mpc_solution(self, qp_iterations, calculation_time):
@@ -188,7 +189,7 @@ class LongitudinalMpc(object):
     self.cur_state[0].x_ego = 0.0
 
     if lead is not None and lead.status:
-      x_lead = lead.dRel
+      x_lead = max(0, lead.dRel - 1)
       v_lead = max(0.0, lead.vLead)
       a_lead = lead.aLeadK
 
@@ -197,16 +198,7 @@ class LongitudinalMpc(object):
         v_lead = 0.0
         a_lead = 0.0
 
-      user_lead_tau = 6.0  # Arbitrary high value in case its not there
       self.a_lead_tau = max(lead.aLeadTau, (a_lead**2 * math.pi) / (2 * (v_lead + 0.01)**2))
-      get_follow_level = getattr(CS, "get_follow_level", None)
-      if callable(get_follow_level):
-        if get_follow_level() == 2:
-          user_lead_tau = 3.
-        elif get_follow_level() == 1:
-          user_lead_tau = 1.7
-      self.a_lead_tau = min(self.a_lead_tau, user_lead_tau)
-
       self.new_lead = False
       if not self.prev_lead_status or abs(x_lead - self.prev_lead_x) > 2.5:
         self.libmpc.init_with_simulation(self.v_mpc, x_lead, v_lead, a_lead, self.a_lead_tau)
@@ -226,7 +218,37 @@ class LongitudinalMpc(object):
 
     # Calculate mpc
     t = sec_since_boot()
-    n_its = self.libmpc.run_mpc(self.cur_state, self.mpc_solution, self.a_lead_tau, a_lead)
+    if CS.vEgo < 11.4:
+      TR=1.8 # under 41km/hr use a TR of 1.8 seconds
+      #if self.lastTR > 0:
+        #self.libmpc.init(MPC_COST_LONG.TTC, 0.1, PC_COST_LONG.ACCELERATION, MPC_COST_LONG.JERK)
+        #self.lastTR = 0
+    else:
+      if CS.readdistancelines == 2:
+        if CS.readdistancelines == self.lastTR:
+          TR=1.8 # 20m at 40km/hr
+        else:
+          TR=1.8
+          self.libmpc.init(MPC_COST_LONG.TTC, 0.1, MPC_COST_LONG.ACCELERATION, MPC_COST_LONG.JERK)
+          self.lastTR = CS.readdistancelines
+      elif CS.readdistancelines == 1:
+        if CS.readdistancelines == self.lastTR:
+          TR=0.9 # 10m at 40km/hr
+        else:
+          TR=0.9
+          self.libmpc.init(MPC_COST_LONG.TTC, 1.0, MPC_COST_LONG.ACCELERATION, MPC_COST_LONG.JERK)
+          self.lastTR = CS.readdistancelines
+      elif CS.readdistancelines == 3:
+        if CS.readdistancelines == self.lastTR:
+          TR=2.7
+        else:
+          TR=2.7 # 30m at 40km/hr
+          self.libmpc.init(MPC_COST_LONG.TTC, 0.05, MPC_COST_LONG.ACCELERATION, MPC_COST_LONG.JERK)
+          self.lastTR = CS.readdistancelines
+      else:
+        TR=1.8 # if readdistancelines = 0
+    #print TR
+    n_its = self.libmpc.run_mpc(self.cur_state, self.mpc_solution, self.a_lead_tau, a_lead, TR)
     duration = int((sec_since_boot() - t) * 1e9)
     self.send_mpc_solution(n_its, duration)
 

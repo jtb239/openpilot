@@ -115,6 +115,14 @@ struct CarState {
   leftBlinker @20 :Bool;
   rightBlinker @21 :Bool;
   genericToggle @23 :Bool;
+  blindspot @26 :Bool;
+  distanceToggle @27 :Float32;
+  laneDepartureToggle @28 :Bool;
+  accSlowToggle @29 :Bool;
+  blindspotside @30 :Float32;
+  blindspotonprev @31 :Bool;
+  readdistancelines @32 :Float32;
+  gasbuttonstatus @33 :Float32;
 
   # lock info
   doorOpen @24 :Bool;
