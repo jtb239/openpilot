@@ -226,9 +226,9 @@ class LongitudinalMpc(object):
     else:
       if CS.readdistancelines == 2:
         if CS.readdistancelines == self.lastTR:
-          TR=1.8 # 20m at 40km/hr
+          TR=1.4 # 20m at 40km/hr
         else:
-          TR=1.8
+          TR=1.4
           self.libmpc.init(MPC_COST_LONG.TTC, 0.1, MPC_COST_LONG.ACCELERATION, MPC_COST_LONG.JERK)
           self.lastTR = CS.readdistancelines
       elif CS.readdistancelines == 1:
@@ -240,9 +240,9 @@ class LongitudinalMpc(object):
           self.lastTR = CS.readdistancelines
       elif CS.readdistancelines == 3:
         if CS.readdistancelines == self.lastTR:
-          TR=2.7
+          TR=1.8
         else:
-          TR=2.7 # 30m at 40km/hr
+          TR=1.8 # 30m at 40km/hr
           self.libmpc.init(MPC_COST_LONG.TTC, 0.05, MPC_COST_LONG.ACCELERATION, MPC_COST_LONG.JERK)
           self.lastTR = CS.readdistancelines
       else:
