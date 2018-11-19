@@ -39,20 +39,34 @@ def parse_way(way):
 
 def get_max_speed(lat, lon, radius=5.):
     api = overpy.Overpass()
+    
+    result = api.query(make_query(lat, lon, radius))
+    num_ways = len(result.ways)
 
-    for _ in range(10):
+    if num_ways == 1:
+        return parse_way(result.ways[0])
+    elif num_ways == 0:
+        radius = 10.
         result = api.query(make_query(lat, lon, radius))
         num_ways = len(result.ways)
-
-        if num_ways == 0:
-            radius *= 1.3
-            continue
-        elif num_ways > 1:
-            radius *= 0.5
-            continue
-        else:
+        if num_ways == 1:
             return parse_way(result.ways[0])
-
+        elif num_ways == 2:
+            return max(parse_way(result.ways[0]), parse_way(result.ways[1]))
+        else:
+            return None
+    elif num_ways == 2:
+        return max(parse_way(result.ways[0]), parse_way(result.ways[1]))
+    elif num_ways > 2:
+        radius = 2.5
+        result = api.query(make_query(lat, lon, radius))
+        num_ways = len(result.ways)
+        if num_ways == 1:
+            return parse_way(result.ways[0])
+        elif num_ways == 2:
+            return max(parse_way(result.ways[0]), parse_way(result.ways[1]))
+        else:
+            return None
     return None
 
 def speedlimitd_thread():
